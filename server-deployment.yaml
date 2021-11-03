@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+  namespace: microblog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: adiachan/microblog:v1
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: microblog-configmap
+                  key: redis_host
+            - name: ELASTICSEARCH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: microblog-configmap
+                  key: elasticsearch_host
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: microblog-configmap
+                  key: mysql_host
+            - name: DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: microblog-configmap
+                  key: database_name
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQLPASSWORD
+            - name: MAIL_SERVER
+              value: "smtp.qq.com"
+            - name: MAIL_USERNAME
+              value: "adiachan@foxmail.com"
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MAIL_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-cluster-ip-service
+  namespace: microblog
+spec:
+  type: ClusterIP
+  selector:
+    component: server
+  ports:
+    - port: 5000
+      targetPort: 5000
