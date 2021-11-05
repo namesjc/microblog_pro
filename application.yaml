@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: microblog
   namespace: argocd
-sepc:
+spec:
   project: default
 
   source:

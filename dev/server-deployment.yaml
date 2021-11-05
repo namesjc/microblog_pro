@@ -68,7 +68,7 @@ metadata:
   name: server-cluster-ip-service
   namespace: microblog
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     component: server
   ports:
